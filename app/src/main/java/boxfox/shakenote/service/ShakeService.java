@@ -2,8 +2,10 @@ package boxfox.shakenote.service;
 
 import android.app.AlarmManager;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -43,12 +45,6 @@ public class ShakeService extends Service implements SensorEventListener {
     @Override
     public void onCreate() {
         super.onCreate();
-        unregisterRestartAlarm();
-        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        accelerormeterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        if (accelerormeterSensor != null)
-            sensorManager.registerListener(this, accelerormeterSensor,
-                    SensorManager.SENSOR_DELAY_GAME);
     }
 
     @Override
@@ -90,7 +86,18 @@ public class ShakeService extends Service implements SensorEventListener {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        startForeground(1, new Notification());
+        unregisterRestartAlarm();
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        accelerormeterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        if (accelerormeterSensor != null)
+            sensorManager.registerListener(this, accelerormeterSensor,
+                    SensorManager.SENSOR_DELAY_GAME);
+        Notification.Builder mBuilder = new Notification.Builder(this);
+        mBuilder.setSmallIcon(R.mipmap.ic_launcher);
+        mBuilder.setTicker("Shake Note");
+        mBuilder.setContentTitle("Shake Note");
+        mBuilder.setContentText("Shake Note가 실행중 입니다.");
+        startForeground(1, mBuilder.build());
         return super.onStartCommand(intent, flags, startId);
     }
 

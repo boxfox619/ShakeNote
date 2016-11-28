@@ -24,14 +24,7 @@
                 <action android:name="ACTION.RESTART.RestartService"></action>
             </intent-filter>
         </receiver>
-        <receiver android:name=".service.ScreenOnReciver"
-            android:enabled="true"
-            android:exported="false" >
-            <intent-filter android:priority="1" >
-                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
-            </intent-filter>
-        </receiver>
-        <service android:name=".service.ScreenOnService" />
+
         <service android:name=".service.ShakeService"/>
 
         <activity

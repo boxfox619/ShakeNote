@@ -2,7 +2,6 @@ package boxfox.shakenote;
 
 import android.app.ActivityManager;
 import android.app.Dialog;
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -36,7 +35,6 @@ import boxfox.shakenote.components.Item;
 import boxfox.shakenote.components.Note;
 import boxfox.shakenote.components.ServiceState;
 import boxfox.shakenote.components.Setting;
-import boxfox.shakenote.service.ScreenOnService;
 import boxfox.shakenote.service.ShakeService;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -198,14 +196,10 @@ public class MainActivity extends AppCompatActivity {
                     serviceState.setRun(true);
                     Intent Service = new Intent(MainActivity.this, ShakeService.class);
                     startService(Service);
-                    Service = new Intent(MainActivity.this, ScreenOnService.class);
-                    startService(Service);
                     Toast.makeText(MainActivity.this,"서비스가 시작되었습니다. 화면을 흔들어보세요!",Toast.LENGTH_SHORT).show();
                 } else {
                     serviceState.setRun(false);
                     Intent Service = new Intent(MainActivity.this, ShakeService.class);
-                    stopService(Service);
-                    Service = new Intent(MainActivity.this, ScreenOnService.class);
                     stopService(Service);
                     Toast.makeText(MainActivity.this,"서비스가 종료되었습니다.",Toast.LENGTH_SHORT).show();
                 }
