@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">ShakeNote</string>
+    <string name="note_package">Note.BoxFox.Note</string>
+    <string name="serviceName">boxfox.shakenote.service.ShakeService</string>
+    <string name="setting">실행할 앱 설정</string>
+    <string name="quick_note">Quick Note</string>
+
+    <string name="adID">ca-app-pub-4487949017987344/2165560511</string>
+    <string name="bannerAdID">ca-app-pub-4487949017987344/3363092117</string>
+</resources>

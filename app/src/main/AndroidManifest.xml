@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="boxfox.shakenote">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme2">
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <receiver android:name=".service.RestartService" android:process=":remote">
+            <intent-filter>
+                <action android:name="ACTION.RESTART.RestartService"></action>
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".service.ScreenOnReciver"
+            android:enabled="true"
+            android:exported="false" >
+            <intent-filter android:priority="1" >
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
+        <service android:name=".service.ScreenOnService" />
+        <service android:name=".service.ShakeService"/>
+
+        <activity
+            android:name=".DialogActivity"
+            android:launchMode="singleTask"
+            android:theme="@android:style/Theme.DeviceDefault.Light.Dialog" />
+        <activity
+            android:name=".NoteActivity"
+            android:launchMode="singleTask"
+            android:theme="@android:style/Theme.DeviceDefault.Light.Dialog" />
+        <activity android:name=".ApplicationListActivity"
+            android:theme="@style/AppTheme"
+            android:label="@string/setting"></activity>
+    </application>
+
+</manifest>
