@@ -13,6 +13,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.IBinder;
 import android.os.SystemClock;
+import android.widget.Toast;
 
 import boxfox.shakenote.DialogActivity;
 import boxfox.shakenote.NoteActivity;
@@ -56,7 +57,7 @@ public class ShakeService extends Service implements SensorEventListener {
         Realm.setDefaultConfiguration(realmConfig);
         Realm realm = Realm.getDefaultInstance();
         ServiceState serviceState = realm.where(ServiceState.class).findFirst();
-        if(serviceState.isRun()){
+        if(serviceState.isShake()){
             registerRestartAlarm();
         }
         if (sensorManager != null)
@@ -98,6 +99,7 @@ public class ShakeService extends Service implements SensorEventListener {
         mBuilder.setContentTitle("Shake Note");
         mBuilder.setContentText("Shake Note가 실행중 입니다.");
         startForeground(1, mBuilder.build());
+        Toast.makeText(ShakeService.this, "서비스가 시작되었습니다. 스마트폰을 흔들어 보세요!", Toast.LENGTH_SHORT).show();
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -118,7 +120,7 @@ public class ShakeService extends Service implements SensorEventListener {
             Realm.setDefaultConfiguration(realmConfig);
             Realm realm = Realm.getDefaultInstance();
             Setting set = realm.where(Setting.class).findFirst();
-            if (gabOfTime > (160+(set.getSensitivity())*5)) {
+            if (gabOfTime > (150+(set.getSensitivity())*5)) {
                 lastTime = currentTime;
                 x = event.values[SensorManager.DATA_X];
                 y = event.values[SensorManager.DATA_Y];

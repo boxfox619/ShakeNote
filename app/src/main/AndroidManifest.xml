@@ -26,6 +26,7 @@
         </receiver>
 
         <service android:name=".service.ShakeService"/>
+        <service android:name=".service.ChatHeadService"/>
 
         <activity
             android:name=".DialogActivity"

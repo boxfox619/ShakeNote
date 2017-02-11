@@ -2,6 +2,7 @@
     <string name="app_name">ShakeNote</string>
     <string name="note_package">Note.BoxFox.Note</string>
     <string name="serviceName">boxfox.shakenote.service.ShakeService</string>
+    <string name="headServiceName">boxfox.shakenote.service.ChatHeadService</string>
     <string name="setting">실행할 앱 설정</string>
     <string name="quick_note">Quick Note</string>
 

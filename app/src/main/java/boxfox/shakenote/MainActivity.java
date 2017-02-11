@@ -1,13 +1,17 @@
 package boxfox.shakenote;
 
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
@@ -35,21 +39,26 @@ import boxfox.shakenote.components.Item;
 import boxfox.shakenote.components.Note;
 import boxfox.shakenote.components.ServiceState;
 import boxfox.shakenote.components.Setting;
+import boxfox.shakenote.service.ChatHeadService;
 import boxfox.shakenote.service.ShakeService;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 
 public class MainActivity extends AppCompatActivity {
+    public static int OVERLAY_PERMISSION_REQ_CODE_CHATHEAD = 1234;
+    public static int OVERLAY_PERMISSION_REQ_CODE_CHATHEAD_MSG = 5678;
     private LinearLayout notelist;
     private Realm realm;
     private Note selectedNote;
-    private InterstitialAd interstitialAd;
     private boolean adCheck = false;
-
+    private Switch serivceSwitch;
+    private Switch headSwitch;
+    private static MainActivity instance;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.instance = this;
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_main);
         ((ImageButton)findViewById(R.id.imageButton)).getBackground().setColorFilter(getResources().getColor(R.color.colorPrimary), PorterDuff.Mode.MULTIPLY);
@@ -58,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
         setRealm();
         initialize();
         setNotelist();
-        setFullAd();
         MobileAds.initialize(getApplicationContext(), getResources().getString(R.string.bannerAdID));
         final AdView mAdView = new AdView(this);
         mAdView.setAdSize(AdSize.BANNER);
@@ -87,27 +95,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy(){
         super.onDestroy();
-        displayAD();
     }
 
-    public void displayAD(){
-            if(interstitialAd.isLoaded()) { //광고가 로드 되었을 시
-                interstitialAd.show(); //보여준다
-            }
-    }
-
-    private void setFullAd(){
-        interstitialAd = new InterstitialAd(this); //새 광고를 만듭니다.
-        interstitialAd.setAdUnitId(getResources().getString(R.string.adID)); //이전에 String에 저장해 두었던 광고 ID를 전면 광고에 설정합니다.
-        AdRequest adRequest1 = new AdRequest.Builder().build(); //새 광고요청
-        interstitialAd.loadAd(adRequest1); //요청한 광고를 load 합니다.
-        interstitialAd.setAdListener(new AdListener() { //전면 광고의 상태를 확인하는 리스너 등록
-
-            @Override
-            public void onAdClosed() { //전면 광고가 열린 뒤에 닫혔을 때
-            }
-        });
-    }
 
     public void setRealm(){
         RealmConfiguration realmConfig = new RealmConfiguration
@@ -145,12 +134,10 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
             }
         });
         if(realm.where(Item.class).count()==0) {
@@ -175,10 +162,16 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
-        Switch serivceSwitch = (Switch)findViewById(R.id.serviceSwitch);
-        if(isServiceRunning(getResources().getString(R.string.serviceName)))serivceSwitch.setChecked(true);
-        serivceSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        serivceSwitch = (Switch)findViewById(R.id.serviceSwitch);
+        headSwitch = (Switch)findViewById(R.id.headSwitch);
+        if(isServiceRunning(getResources().getString(R.string.serviceName))){
+            serivceSwitch.setChecked(true);
+            headSwitch.setChecked(false);
+        }else if(isServiceRunning(getResources().getString(R.string.headServiceName))){
+            headSwitch.setChecked(true);
+            serivceSwitch.setChecked(false);
+        }
+        CompoundButton.OnCheckedChangeListener onClickListener = new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 RealmConfiguration realmConfig = new RealmConfiguration
@@ -188,24 +181,93 @@ public class MainActivity extends AppCompatActivity {
                 Realm.setDefaultConfiguration(realmConfig);
                 Realm realm = Realm.getDefaultInstance();
                 ServiceState serviceState;
-                realm.beginTransaction();
                 if(realm.where(ServiceState.class).count()==0)
-                serviceState = realm.createObject(ServiceState.class);
+                    serviceState = realm.createObject(ServiceState.class);
                 else serviceState = realm.where(ServiceState.class).findFirst();
                 if (isChecked) {
-                    serviceState.setRun(true);
-                    Intent Service = new Intent(MainActivity.this, ShakeService.class);
+                    Intent Service = null;
+                    if(buttonView.equals(serivceSwitch)) {
+                        realm.beginTransaction();
+                        serviceState.setShake(true);
+                        serviceState.setHead(false);
+                        realm.commitTransaction();
+                        headSwitch.setChecked(false);
+                        Service = new Intent(MainActivity.this, ShakeService.class);
+                    }else{
+                        if(!Utils.canDrawOverlays(MainActivity.this)) {
+                            requestPermission(OVERLAY_PERMISSION_REQ_CODE_CHATHEAD);
+                            headSwitch.setChecked(false);
+                            return;
+                        }
+                        realm.beginTransaction();
+                        serviceState.setShake(false);
+                        serviceState.setHead(true);
+                        realm.commitTransaction();
+                        serivceSwitch.setChecked(false);
+                        Service = new Intent(MainActivity.this, ChatHeadService.class);
+                    }
                     startService(Service);
-                    Toast.makeText(MainActivity.this,"서비스가 시작되었습니다. 화면을 흔들어보세요!",Toast.LENGTH_SHORT).show();
                 } else {
-                    serviceState.setRun(false);
-                    Intent Service = new Intent(MainActivity.this, ShakeService.class);
+                    Intent Service = null;
+                    if(buttonView.equals(serivceSwitch)) {
+                        realm.beginTransaction();
+                        serviceState.setShake(false);
+                        realm.commitTransaction();
+                        Service = new Intent(MainActivity.this, ShakeService.class);
+                    }else{
+                        realm.beginTransaction();
+                        serviceState.setHead(false);
+                        realm.commitTransaction();
+                        Service = new Intent(MainActivity.this, ChatHeadService.class);
+                    }
                     stopService(Service);
-                    Toast.makeText(MainActivity.this,"서비스가 종료되었습니다.",Toast.LENGTH_SHORT).show();
                 }
-                realm.commitTransaction();
+            }
+        };
+        serivceSwitch.setOnCheckedChangeListener(onClickListener);
+        headSwitch.setOnCheckedChangeListener(onClickListener);
+    }
+
+    private void needPermissionDialog(final int requestCode){
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setMessage("권한 허용이 필요합니다.");
+        builder.setPositiveButton("OK",
+                new android.content.DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        requestPermission(requestCode);
+                    }
+                });
+        builder.setNegativeButton("Cancel", new android.content.DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
             }
         });
+        builder.setCancelable(false);
+        builder.show();
+    }
+
+    private void requestPermission(int requestCode){
+        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+        intent.setData(Uri.parse("package:" + getPackageName()));
+        startActivityForResult(intent, requestCode);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == OVERLAY_PERMISSION_REQ_CODE_CHATHEAD) {
+            if (!Utils.canDrawOverlays(MainActivity.this)) {
+                needPermissionDialog(requestCode);
+            }
+
+        }else if(requestCode == OVERLAY_PERMISSION_REQ_CODE_CHATHEAD_MSG){
+            if (!Utils.canDrawOverlays(MainActivity.this)) {
+                needPermissionDialog(requestCode);
+            }
+        }
     }
 
     public Boolean isServiceRunning(String serviceName) {
@@ -296,5 +358,14 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     }
+
+    public void stoppedHeadService(){
+        headSwitch.setChecked(false);
+    }
+
+    public static MainActivity getInstance(){
+        return instance;
+    }
+
 
 }
