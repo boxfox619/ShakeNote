@@ -7,8 +7,8 @@
 - Note list management
 
 # Screenshoot
-![](http://cfile26.uf.tistory.com/image/99A2BB4D5A49DBBF275D8F =250x)
-![](http://cfile27.uf.tistory.com/image/99D639345A49DBBF371E49 =250x)
-![](http://cfile25.uf.tistory.com/image/99F5D33D5A49DBBF31442D =250x)
-![](http://cfile24.uf.tistory.com/image/998AD9365A49DBBF2AA9FA =250x)
+![alt tag](http://cfile26.uf.tistory.com/image/99A2BB4D5A49DBBF275D8F =250x)
+![alt tag](http://cfile27.uf.tistory.com/image/99D639345A49DBBF371E49 =250x)
+![alt tag](http://cfile25.uf.tistory.com/image/99F5D33D5A49DBBF31442D =250x)
+![alt tag](http://cfile24.uf.tistory.com/image/998AD9365A49DBBF2AA9FA =250x)
 
