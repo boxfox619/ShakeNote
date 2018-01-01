@@ -6,6 +6,6 @@
 - Chathead to open note dialog
 - Note list management
 
-# Screenshoot
+# Screenshot
 <img src="http://cfile26.uf.tistory.com/image/99A2BB4D5A49DBBF275D8F" width="200px"/><img src="http://cfile27.uf.tistory.com/image/99D639345A49DBBF371E49" width="200px"/><img src="http://cfile25.uf.tistory.com/image/99F5D33D5A49DBBF31442D" width="200px"/><img src="http://cfile24.uf.tistory.com/image/998AD9365A49DBBF2AA9FA" width="200px"/>
 
